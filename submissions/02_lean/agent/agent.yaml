@@ -1,0 +1,38 @@
+# 02_lean — response to the 0.812 baseline.
+#
+# What changed vs 01_baseline and why:
+#
+#   1. MODEL. 01_baseline fell back to claude-haiku-4-5 ($1.00 in / $5.00 out
+#      per M) after the gpt-oss-120b backend failed. That is 11-14x the price
+#      the design assumed, so the $2 cap almost certainly became binding before
+#      the full model zoo ran. gemini-3.1-flash-lite is $0.25/$1.50 -- 4x/3.3x
+#      cheaper than Haiku -- and supports multiple tools.
+#
+#      If this backend also fails, swap `model:` to one of these, in order of
+#      preference. All are multi-tool capable and cheap:
+#          qwen3-235b           $0.22 / $0.88
+#          deepseek-v3.2        $0.56 / $1.68
+#          gemini-3-flash-preview  $0.50 / $3.00
+#      Do NOT use gemini-2.5-* (single tool only) or deepseek-r1-0528 (no tools).
+#
+#   2. TURN COUNT. Every turn re-sends the system prompt and the whole tool
+#      transcript, so cost grows quadratically in turns. The prompt is now a
+#      fixed 6-step script with no exploration loop and no free-form EDA.
+#
+#   3. TIME GUARD. The skill script now takes --time-budget and degrades
+#      gracefully instead of being killed mid-fit.
+name: lean_agent
+model: gemini-3.1-flash-lite
+description: Minimal-turn autonomous tabular classifier driving a time-bounded AutoML skill.
+instruction: !include prompts/system.md
+
+tools:
+  - run_command
+  - submit_predictions
+  - select_submission
+  - get_status
+
+skills:
+  - skills/tabular-automl
+
+generate_content_config: !include configs/sampling.yaml

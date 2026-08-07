@@ -1,0 +1,59 @@
+# 03_skilled — fixes the bug that almost certainly caused 01_baseline's 0.812.
+#
+# THE BUG. Local evaluation showed the agent spending its opening minutes on:
+#     ls -F /skills/            -> error
+#     ls -F /opt/ | grep skills -> error
+#     find / -type d -name skills
+#     find / -name tabular-automl -type d
+# ...then giving up and writing its own train_model.py from scratch.
+#
+# Bundled skills are NOT materialised as a `skills/` directory in the sandbox.
+# adk_submission wraps them in google.adk.tools.skill_toolset.SkillToolset,
+# which exposes them as TOOLS: list_skills, load_skill, load_skill_resource,
+# and run_skill_script. The script is materialised only at execution time.
+#
+# So `run_command("python skills/tabular-automl/scripts/run_automl.py ...")`
+# -- what 01_baseline and 02_lean both instructed -- could never work. The
+# agent fell back to hand-written LightGBM, which is exactly what a ~0.81
+# score looks like against a 0.822 field.
+#
+# 03_skilled invokes the skill correctly via run_skill_script.
+#
+# SECOND BUG, found in the same run: skill scripts do not execute with cwd set
+# to the sandbox working directory. The harness materialises the skill into its
+# own directory and runs `runpy.run_path('scripts/run_automl.py')` from there,
+# so `pd.read_csv("train.csv")` raised FileNotFoundError even though
+# `run_command("ls -F")` listed train.csv. run_automl.py now locates the data
+# directory itself and chdirs into it.
+#
+# BUDGET NOTE: the earlier theory that the $2 LLM cap caused 01_baseline's 0.812
+# was WRONG. A full local session cost ~$0.018 (65k prompt / 967 completion
+# tokens at gemini-3.1-flash-lite rates) -- about 1% of the cap. Token budget is
+# not the binding constraint; correctness of the skill invocation was.
+#
+# LOCAL-TEST-ONLY VARIANT: identical to 03_skilled in every respect (same
+# system.md, same skill, same run_automl.py) except the orchestrator model,
+# swapped to claude-haiku-4-5. Purpose: isolate model choice from pipeline
+# version when comparing claude-haiku-4-5 (01_baseline) vs gemini-3.1-flash-
+# lite (03_skilled) -- those two differ in BOTH model and pipeline, so a
+# score difference between them can't be attributed to either alone. This
+# variant changes exactly one thing. Not a real submission candidate.
+name: skilled_agent_haiku
+model: claude-haiku-4-5
+description: Minimal-turn autonomous tabular classifier driving a bundled AutoML skill via run_skill_script.
+instruction: !include prompts/system.md
+
+# NOTE: declaring `skills` automatically adds list_skills, load_skill,
+# load_skill_resource and run_skill_script to the toolset. write_file is
+# declared only so the documented fallback path in the prompt can work.
+tools:
+  - run_command
+  - write_file
+  - submit_predictions
+  - select_submission
+  - get_status
+
+skills:
+  - skills/tabular-automl
+
+generate_content_config: !include configs/sampling.yaml

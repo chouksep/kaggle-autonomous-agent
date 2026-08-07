@@ -1,0 +1,24 @@
+# Local smoke-test variant of 01_baseline, routed through Anthropic directly.
+#
+# 01_baseline targets gpt-oss-120b, which is only reachable through Kaggle's
+# model proxy (not via a personal Gemini/OpenAI/Anthropic key). This copy
+# swaps in claude-haiku-4-5 purely so the agent + skill can be exercised
+# end-to-end locally with a real Anthropic key. Not the intended competition
+# submission -- 01_baseline/agent.yaml is unchanged.
+name: claude_smoke_agent
+model: claude-haiku-4-5
+description: Autonomous tabular binary-classification agent driving a bundled AutoML skill.
+instruction: !include prompts/system.md
+
+tools:
+  - run_command
+  - write_file
+  - edit_file
+  - submit_predictions
+  - select_submission
+  - get_status
+
+skills:
+  - skills/tabular-automl
+
+generate_content_config: !include configs/sampling.yaml

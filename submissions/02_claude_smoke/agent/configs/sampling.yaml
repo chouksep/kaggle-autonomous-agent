@@ -1,0 +1,4 @@
+# claude-haiku-4-5 rejects `temperature` in generate_content_config, so it's
+# omitted here (unlike 01_baseline/configs/sampling.yaml).
+top_p: 0.9
+max_output_tokens: 8192

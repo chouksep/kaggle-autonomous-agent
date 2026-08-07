@@ -1,0 +1,4 @@
+# claude-haiku-4-5 rejects `temperature` in generate_content_config entirely,
+# so it's omitted here.
+top_p: 0.9
+max_output_tokens: 8192

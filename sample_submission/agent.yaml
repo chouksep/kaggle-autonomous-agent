@@ -1,0 +1,6 @@
+name: sample_submission
+model: gemini-3.5-flash
+instruction: !include prompts/system.md
+tools:
+  - submit_predictions
+generate_content_config: !include configs/sampling.yaml

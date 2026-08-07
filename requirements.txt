@@ -1,0 +1,27 @@
+# Kaggle-in-Kaggle Starter Kit Local Dependencies
+
+# Core evaluation framework and submission compiler (installed from local wheels)
+./wheels/adk_submission-0.1.0-py3-none-any.whl
+./wheels/kaggle_kaggle-0.1.0-py3-none-any.whl
+
+# LLM routing and environment management
+litellm>=1.30.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.0
+pydantic>=2.5.0
+
+# Dev tooling only (pushes local agent traces to Databricks MLflow for
+# browsing) -- not needed for the actual Kaggle evaluation/submission path.
+mlflow>=3.0.0
+
+# Data science packages for local metric evaluation
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+
+# Mirrors the ML libs pre-installed in the grading sandbox
+# (gcr.io/kaggle-images/python). Needed to actually run/test the bundled
+# tabular-automl skill offline before spending a Kaggle submission on it.
+scipy>=1.10.0
+lightgbm>=4.0.0
+catboost>=1.2.0

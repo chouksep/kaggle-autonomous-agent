@@ -1,0 +1,8 @@
+# This agent should be deterministic and terse. Output tokens are the expensive
+# half of the bill ($1.50/M here vs $0.25/M input), so the cap is deliberately
+# low -- the agent has nothing long to say, it just calls tools.
+#
+# NOTE: if you swap agent.yaml to a claude-* model, DELETE the temperature line.
+# Newer Anthropic models reject `temperature` in the generation config.
+temperature: 0.0
+max_output_tokens: 2048

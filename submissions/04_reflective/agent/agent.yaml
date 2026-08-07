@@ -1,0 +1,32 @@
+# 04_reflective -- adds one orchestrator-visible decision point on top of
+# 03_skilled: after the full zoo, the skill diagnoses whether the winning
+# model has a statistically significant weak segment (honest-split,
+# p<0.01), and if so, the orchestrator can try a --mode apply-recipe pass
+# that targets exactly that segment as a new binary feature and re-runs
+# the zoo, keeping it only if CV actually improves.
+#
+# LOCAL-VALIDATION-ONLY VARIANT until it clears the promotion bar (see
+# docs/superpowers/specs/2026-08-06-reflective-recipe-pipeline-design.md):
+# a real, non-noise-sized offline improvement across the 16 known datasets
+# via bench_v2.py --reflective. Forked from 03_skilled with the same
+# tools/model, so any measured score delta is attributable to this
+# pipeline change alone, not a confounded model change.
+name: reflective_agent
+model: claude-opus-4-5
+description: Minimal-turn autonomous tabular classifier driving a bundled AutoML skill via run_skill_script, with an error-analysis-informed recipe step.
+instruction: !include prompts/system.md
+
+# NOTE: declaring `skills` automatically adds list_skills, load_skill,
+# load_skill_resource and run_skill_script to the toolset. write_file is
+# declared only so the documented fallback path in the prompt can work.
+tools:
+  - run_command
+  - write_file
+  - submit_predictions
+  - select_submission
+  - get_status
+
+skills:
+  - skills/tabular-automl
+
+generate_content_config: !include configs/sampling.yaml

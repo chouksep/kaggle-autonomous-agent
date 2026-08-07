@@ -1,0 +1,7 @@
+# This agent should be deterministic and terse. Output tokens are the
+# expensive half of the bill, so the cap is deliberately low -- the agent has
+# nothing long to say, it just calls tools.
+#
+# claude-opus-4-5 rejects `temperature` in generate_content_config entirely,
+# so it's omitted here (unlike 03_skilled/configs/sampling.yaml).
+max_output_tokens: 2048

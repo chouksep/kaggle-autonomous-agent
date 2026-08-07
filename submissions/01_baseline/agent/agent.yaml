@@ -1,0 +1,30 @@
+# Baseline agent for Autonomous Agent Prediction (Beta)
+#
+# Design: a cheap orchestrator LLM whose job is to RUN a pre-tested bundled
+# pipeline, not to author ML code from scratch. This attacks the two biggest
+# score-killers at once:
+#   1. the $2 token budget (bundled scripts cost no output tokens)
+#   2. "agent completed without submitting any valid predictions"
+#
+# Model choice: originally gpt-oss-120b ($0.09/$0.36 per M) for cost, but its
+# backend proxy route failed twice in a row (ServiceUnavailableError, then
+# RateLimitError) on real submissions. claude-haiku-4-5 costs more per token
+# but has run end-to-end without errors and stays well under the $2 budget.
+# Do NOT use gemini-2.5-* (single-tool only) or deepseek-r1-0528 (no tools).
+name: baseline_agent
+model: claude-haiku-4-5
+description: Autonomous tabular binary-classification agent driving a bundled AutoML skill.
+instruction: !include prompts/system.md
+
+tools:
+  - run_command
+  - write_file
+  - edit_file
+  - submit_predictions
+  - select_submission
+  - get_status
+
+skills:
+  - skills/tabular-automl
+
+generate_content_config: !include configs/sampling.yaml
